@@ -10,16 +10,34 @@
       <div class="flex-1">
         <div class="type__table">
           <div class="type__table-header flex">
-            <div class="type__table-title">顏色</div>
+            <!-- ✅ 編輯模式 -->
+            <div v-if="isEditing1">
+              <!-- 失焦時儲存 -->
+              <!-- 按 Enter 鍵儲存 -->
+              <input
+                type="text"
+                v-model="productStore.editable1"
+                @keyup.enter="saveTitle1"
+                @blur="saveTitle1"
+                class="type__table-input"
+                autofocus
+              />
+            </div>
+
+            <!-- ✅ 非編輯模式 -->
+            <div v-else class="type__table-title">{{ productStore.editable1 }}</div>
+
             <span class="type__table-subtitle">（自定義）</span>
-            <button class="type__table-edit">
+
+            <!-- ✅ 點擊鉛筆進入編輯模式 -->
+            <button class="type__table-edit" @click="enableEditing1">
               <font-awesome-icon :icon="['fas', 'pencil']" class="pencil" />
             </button>
           </div>
           <div class="type__table-body grid grid-cols-2 gap-4">
             <div
               class="type__table-option flex"
-              v-for="(color, index) in availableColors"
+              v-for="(color, index) in productStore.specs.colors"
               :key="index"
             >
               <div class="type__table-pic">
@@ -30,7 +48,7 @@
               <div class="type__table-move">
                 <font-awesome-icon :icon="['fas', 'up-down-left-right']" />
               </div>
-              <div class="type__table-delete">
+              <div class="type__table-delete" @click="deleteColor(color)">
                 <font-awesome-icon :icon="['fas', 'trash-can']" />
               </div>
             </div>
@@ -62,16 +80,34 @@
         </div>
         <div class="type__table">
           <div class="type__table-header flex">
-            <div class="type__table-title">大小</div>
+            <!-- ✅ 編輯模式 -->
+            <div v-if="isEditing2">
+              <!-- 失焦時儲存 -->
+              <!-- 按 Enter 鍵儲存 -->
+              <input
+                type="text"
+                v-model="productStore.editable2"
+                @keyup.enter="saveTitle2"
+                @blur="saveTitle2"
+                class="type__table-input"
+                autofocus
+              />
+            </div>
+
+            <!-- ✅ 非編輯模式 -->
+            <div v-else class="type__table-title">{{ productStore.editable2 }}</div>
+
             <span class="type__table-subtitle">（自定義）</span>
-            <button class="type__table-edit">
+
+            <!-- ✅ 點擊鉛筆進入編輯模式 -->
+            <button class="type__table-edit" @click="enableEditing2">
               <font-awesome-icon :icon="['fas', 'pencil']" class="pencil" />
             </button>
           </div>
           <div class="type__table-body grid grid-cols-2 gap-4">
             <div
               class="type__table-option flex"
-              v-for="(size, index) in availableSizes"
+              v-for="(size, index) in productStore.specs.sizes"
               :key="index"
             >
               <div class="type__table-input">{{ size }}</div>
@@ -79,7 +115,7 @@
               <div class="type__table-move">
                 <font-awesome-icon :icon="['fas', 'up-down-left-right']" />
               </div>
-              <div class="type__table-delete">
+              <div class="type__table-delete" @click="deleteSize(size)">
                 <font-awesome-icon :icon="['fas', 'trash-can']" />
               </div>
             </div>
@@ -105,9 +141,9 @@
           <tr>
             <th>
               <font-awesome-icon :icon="['fas', 'circle-dot']" class="info__box-titleIcon" />
-              顏色
+              {{ productStore.editable1 }}
             </th>
-            <th class="">大小</th>
+            <th class="">{{ productStore.editable2 }}</th>
             <th class="">價格</th>
             <th class="">商品數量</th>
           </tr>
@@ -119,8 +155,6 @@
               <div>{{ color }}</div>
               <div class="info__table-pic">
                 <img :src="productStore.specs.colorImages[color]" alt="顏色圖片" />
-
-                <!-- <img src="/cat.jpg" alt="" /> -->
               </div>
             </td>
 
@@ -185,6 +219,44 @@ export default defineComponent({
   // name: 'QualityType',
   setup() {
     const productStore = useProductStore()
+    // ✅ 刪除顏色
+    const deleteColor = (color: string) => {
+      if (confirm(`確定要刪除 ${color} 嗎？此操作將刪除所有相關資料！`)) {
+        productStore.deleteColor(color)
+      }
+    }
+    // ✅ 刪除尺寸
+    const deleteSize = (size: string) => {
+      if (confirm(`確定要刪除 ${size} 嗎？此操作將刪除所有相關資料！`)) {
+        productStore.deleteSize(size)
+      }
+    }
+
+    // 控制是否進入編輯模式
+    const isEditing1 = ref(false)
+    const isEditing2 = ref(false)
+
+    // ✅ 進入編輯模式
+    const enableEditing1 = () => {
+      isEditing1.value = true
+    }
+    const enableEditing2 = () => {
+      isEditing2.value = true
+    }
+
+    // ✅ 儲存標題
+    const saveTitle1 = () => {
+      if (productStore.editable1.trim() === '') {
+        productStore.setEditable1('顏色') // 避免空白，還原為預設值
+      }
+      isEditing1.value = false
+    }
+    const saveTitle2 = () => {
+      if (productStore.editable2.trim() === '') {
+        productStore.setEditable2('顏色') // 避免空白，還原為預設值
+      }
+      isEditing2.value = false
+    }
 
     // 取得顏色對應的圖片
     const getColorImage = (color: string) => {
@@ -276,16 +348,6 @@ export default defineComponent({
       productStore.setProductPrice(color, size, priceValue.value[color][size])
     }
 
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
-    // ----------分隔線-----------
     // 定義新增規格的輸入框
     const newColor = ref('')
     const newSize = ref('')
@@ -359,6 +421,16 @@ export default defineComponent({
       triggerFileInput,
 
       getColorImage,
+
+      isEditing1,
+      enableEditing1,
+      saveTitle1,
+      isEditing2,
+      enableEditing2,
+      saveTitle2,
+
+      deleteColor,
+      deleteSize,
     }
   },
 })

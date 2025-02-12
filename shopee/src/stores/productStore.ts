@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 
 export const useProductStore = defineStore('productStore', {
   state: () => ({
+    editable1: '顏色',
+    editable2: '尺寸',
     images: {},
     // 商品規格
     specs: {
@@ -14,6 +16,16 @@ export const useProductStore = defineStore('productStore', {
         綠色: '../uploads/cat.jpg',
         藍色: '../uploads/cat.jpg',
       } as Record<string, string>,
+      // prices: {
+      //   '紅色-S': 100,
+      //   '綠色-M': 150,
+      //   '藍色-L': 200,
+      // },
+      // quantities: {
+      //   '紅色-S': 10,
+      //   '綠色-M': 5,
+      //   '藍色-L': 8,
+      // },
     },
 
     // 商品數量,使用 `顏色-尺寸` 作為 Key
@@ -35,6 +47,26 @@ export const useProductStore = defineStore('productStore', {
 
   // Action（用於修改資料或業務邏輯）
   actions: {
+    // ✅ 刪除顏色及其相關資料
+    deleteColor(color: string) {
+      // 刪除顏色
+      this.specs.colors = this.specs.colors.filter((c) => c !== color)
+
+      // 刪除顏色圖片
+      delete this.specs.colorImages[color]
+    },
+    deleteSize(size: string) {
+      // 刪除尺寸
+      this.specs.sizes = this.specs.sizes.filter((c) => c !== size)
+    },
+
+    // 規格分類
+    setEditable1(newTitle: string) {
+      this.editable1 = newTitle
+    },
+    setEditable2(newTitle: string) {
+      this.editable2 = newTitle
+    },
     // 取得前台顏色對應的圖片
     // getColorImage(color: string) {
     //   return this.specs.colorImages[color] || ''
